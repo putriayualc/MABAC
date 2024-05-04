@@ -1,11 +1,13 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Scanner;
 
 public class MabacSPK {
     private ArrayList<Kriteria> kriteria = new ArrayList<>();
     private ArrayList<Alternatif> alternatif = new ArrayList<>();
     private int[][] matriksKeputusan;
+    private Scanner sc = new Scanner(System.in);
 
     MabacSPK(){
         //kriteria awal yang ada di jobsheet
@@ -37,16 +39,114 @@ public class MabacSPK {
         };
     }
 
-    public ArrayList<Kriteria> getKriteria() {
-        return kriteria;
+    public void tampilKriteria() {
+        System.out.println("_______________________KRITERIA________________________");
+        System.out.printf("  | %-35s  %-5s  %-7s\n", "Nama Kriteria","Bobot", "Jenis");
+        System.out.println("--|----------------------------------------------------");
+        for (int i = 0; i < kriteria.size(); i++) {
+            System.out.printf("%2s| %-35s  %-5s  %-7s\n", "C"+(i+1), kriteria.get(i).getNamaKriteria(), kriteria.get(i).getBobot(), (kriteria.get(i).getJenis() ? "Benefit" : "Cost"));
+        }        
+        System.out.println("-------------------------------------------------------");
     }
 
-    public ArrayList<Alternatif> getAlternatif() {
-        return alternatif;
+    public void editKriteria(int index, String nama, float bobot, String jenis){
+        kriteria.get(index-1).setNamaKriteria(nama);
+        kriteria.get(index-1).setBobot(bobot);
+        kriteria.get(index-1).setJenis(jenis.equalsIgnoreCase("benefit") ? true : false);
     }
 
-    public int[][] getMatriksKeputusan() {
-        return matriksKeputusan;
+    public void tambahKriteria(String nama, float bobot, String jenis){
+        kriteria.add(new Kriteria(nama, bobot, (jenis.equalsIgnoreCase("benefit") ? true : false)));
+        System.out.println("Masukkan nilai untuk tiap alternatif");
+        int[] baruC= new int[alternatif.size()];
+        for (int i = 0; i < alternatif.size(); i++) {
+            System.out.print(alternatif.get(i).getNamaAlternatif() + "(1-100) : ");
+            int nilai = sc.nextInt();
+            baruC[i] = nilai;
+        }
+
+        int[][] mat = new int[alternatif.size()][kriteria.size()];
+        for (int i = 0; i < mat.length; i++) {
+            for (int j = 0; j < matriksKeputusan[0].length; j++) {
+                mat[i][j]=matriksKeputusan[i][j];
+            }
+        }
+
+        for (int i = 0; i < mat.length; i++) {
+            mat[i][mat[0].length-1]=baruC[i];
+        }
+
+        matriksKeputusan = mat;
+    }
+
+    public void tampilAlternatif() {
+        System.out.println("______________________ALTERNATIF_______________________");
+        System.out.printf("  | %s\n", "Nama Desa");
+        System.out.println("--|----------------------------------------------------");
+        for (int i = 0; i <alternatif.size(); i++) {
+            System.out.printf("%2s| %s\n", "A"+(i+1), alternatif.get(i).getNamaAlternatif());
+        }        
+        System.out.println("-------------------------------------------------------");
+    }
+
+    public void tambahAlternatif(String nama){
+        alternatif.add(new Alternatif(nama));
+        System.out.println("Masukkan nilai untuk tiap kriteria");
+        int[] baruA = new int[kriteria.size()];
+        for (int i = 0; i < baruA.length; i++) {
+            System.out.print(kriteria.get(i).getNamaKriteria()+" (1-100) : ");
+            baruA[i] = sc.nextInt();
+        }
+
+        int[][] mat = new int[alternatif.size()][kriteria.size()];
+        for (int i = 0; i < matriksKeputusan.length; i++) {
+            for (int j = 0; j < matriksKeputusan[0].length; j++) {
+                mat[i][j]=matriksKeputusan[i][j];
+            }
+        }
+
+        for (int j = 0; j < mat[0].length; j++) {
+            mat[mat.length-1][j]=baruA[j];
+        }
+
+        matriksKeputusan = mat;
+    }
+
+    public void hapusAlternatif(int index){
+        alternatif.remove(index-1);
+
+        int[][] matBaru = new int[alternatif.size()][kriteria.size()];
+        int idx =0;
+        for (int i = 0; i < matriksKeputusan.length; i++) {
+            if (i != index-1) {
+                for (int j = 0; j < matBaru[0].length; j++) {
+                    matBaru[idx][j] = matriksKeputusan[i][j];
+                }   
+                idx++;
+            }
+        }
+
+        matriksKeputusan = matBaru;
+    }
+
+    public void updateMatriks(int baris, int kolom, int nilai){
+        matriksKeputusan[baris-1][kolom-1] = nilai;
+    }
+
+    public void tampilMatriks() {
+        System.out.println("_________________________________________");
+        System.out.print("           |");
+        for (int i = 0; i < kriteria.size(); i++) {
+            System.out.print("  C" + (i+1) + " ");
+        }
+        System.out.println("\n=========================================");
+        for (int i = 0; i < matriksKeputusan.length; i++) {
+            System.out.printf("%-10s |",alternatif.get(i).getNamaAlternatif());
+            for (int j = 0; j < matriksKeputusan[0].length; j++) {
+                System.out.printf("  %2d " ,matriksKeputusan[i][j]);
+            }
+            System.out.println();
+        }
     }
 
     public void hitung(){
@@ -55,12 +155,15 @@ public class MabacSPK {
         double[] batas = perkiraanBatas(hitung);
         hitung = jarak(hitung, batas);
         Double[] hasil = hasilAkhir(hitung);
-
+        System.out.println("-------------SKOR AKHIR-------------");
+        for (int i = 0; i < hasil.length; i++) {
+        System.out.printf("%-11s = %s\n", alternatif.get(i).getNamaAlternatif(), hasil[i]);
+        }
+        System.out.println("------------------------------------");
         // Mencari alternatif terbaik
         Double max = Collections.max(Arrays.asList(hasil));
         int rank1 = Arrays.asList(hasil).indexOf(max);
-
-        System.out.println("\nDapat disimpulkan, " + alternatif.get(rank1).getNamaAlternatif() + " merupakan alternatif terbaik dengan skor = " + max);
+        System.out.println("Dapat disimpulkan, Desa " + alternatif.get(rank1).getNamaAlternatif() + " merupakan alternatif terbaik dengan skor = " + max);
     }
 
     private double[][] normalisasi(){
