@@ -15,7 +15,6 @@ public class MabacSPK {
         kriteria.add(new Kriteria("Kesehatan Masyarakat", 0.30f, true));
         kriteria.add(new Kriteria("Ekonomi Masyarakat", 0.25f, true));
         kriteria.add(new Kriteria("Pemberdayaan kesejahteraan keluarga", 0.20f, true));
-
         //alternatif awal yang ada di jobsheet
         alternatif.add(new Alternatif("Nangkaan"));
         alternatif.add(new Alternatif("Sukowiryo"));
@@ -25,7 +24,6 @@ public class MabacSPK {
         alternatif.add(new Alternatif("Pejaten"));
         alternatif.add(new Alternatif("Badean"));
         alternatif.add(new Alternatif("Blindungan"));
-
         //matriks keputusan yang ada di jobsheet
         matriksKeputusan = new int[][]{
             {90, 81, 89, 77},
@@ -61,8 +59,7 @@ public class MabacSPK {
         int[] baruC= new int[alternatif.size()];
         for (int i = 0; i < alternatif.size(); i++) {
             System.out.print(alternatif.get(i).getNamaAlternatif() + "(1-100) : ");
-            int nilai = sc.nextInt();
-            baruC[i] = nilai;
+            baruC[i] = sc.nextInt();
         }
 
         int[][] mat = new int[alternatif.size()][kriteria.size()];
@@ -75,7 +72,6 @@ public class MabacSPK {
         for (int i = 0; i < mat.length; i++) {
             mat[i][mat[0].length-1]=baruC[i];
         }
-
         matriksKeputusan = mat;
     }
 
@@ -108,13 +104,11 @@ public class MabacSPK {
         for (int j = 0; j < mat[0].length; j++) {
             mat[mat.length-1][j]=baruA[j];
         }
-
         matriksKeputusan = mat;
     }
 
     public void hapusAlternatif(int index){
         alternatif.remove(index-1);
-
         int[][] matBaru = new int[alternatif.size()][kriteria.size()];
         int idx =0;
         for (int i = 0; i < matriksKeputusan.length; i++) {
@@ -125,7 +119,6 @@ public class MabacSPK {
                 idx++;
             }
         }
-
         matriksKeputusan = matBaru;
     }
 
@@ -157,18 +150,16 @@ public class MabacSPK {
         Double[] hasil = hasilAkhir(hitung);
         System.out.println("-------------SKOR AKHIR-------------");
         for (int i = 0; i < hasil.length; i++) {
-        System.out.printf("%-11s = %s\n", alternatif.get(i).getNamaAlternatif(), hasil[i]);
+            System.out.printf("%-11s = %s\n", alternatif.get(i).getNamaAlternatif(), hasil[i]);
         }
         System.out.println("------------------------------------");
-        // Mencari alternatif terbaik
-        Double max = Collections.max(Arrays.asList(hasil));
+        Double max = Collections.max(Arrays.asList(hasil));// Mencari alternatif terbaik
         int rank1 = Arrays.asList(hasil).indexOf(max);
         System.out.println("Dapat disimpulkan, Desa " + alternatif.get(rank1).getNamaAlternatif() + " merupakan alternatif terbaik dengan skor = " + max);
     }
 
     private double[][] normalisasi(){
         double[][] normal = new double[alternatif.size()][kriteria.size()];
-
         //mencari nilai maks dan min tiap kolom
         int[] max = new int[normal[0].length];
         int[] min = new int[normal[0].length];
@@ -180,7 +171,6 @@ public class MabacSPK {
             max[i] = Arrays.stream(column).max().getAsInt();
             min[i] = Arrays.stream(column).min().getAsInt();
         }
-
         //normalisasi
         for (int i = 0; i < normal.length; i++) {
             for (int j = 0; j < normal[0].length; j++) {
