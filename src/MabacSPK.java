@@ -3,9 +3,9 @@ import java.util.Arrays;
 import java.util.Collections;
 
 public class MabacSPK {
-    ArrayList<Kriteria> kriteria = new ArrayList<>();
-    ArrayList<Alternatif> alternatif = new ArrayList<>();
-    int[][] matriksKeputusan;
+    private ArrayList<Kriteria> kriteria = new ArrayList<>();
+    private ArrayList<Alternatif> alternatif = new ArrayList<>();
+    private int[][] matriksKeputusan;
 
     MabacSPK(){
         //kriteria awal yang ada di jobsheet
@@ -37,6 +37,18 @@ public class MabacSPK {
         };
     }
 
+    public ArrayList<Kriteria> getKriteria() {
+        return kriteria;
+    }
+
+    public ArrayList<Alternatif> getAlternatif() {
+        return alternatif;
+    }
+
+    public int[][] getMatriksKeputusan() {
+        return matriksKeputusan;
+    }
+
     public void hitung(){
         double[][] hitung = normalisasi();
         hitung = pembobotan(hitung);
@@ -44,14 +56,15 @@ public class MabacSPK {
         hitung = jarak(hitung, batas);
         Double[] hasil = hasilAkhir(hitung);
 
+        // Mencari alternatif terbaik
         Double max = Collections.max(Arrays.asList(hasil));
         int rank1 = Arrays.asList(hasil).indexOf(max);
 
-        System.out.println("\nDapat disimpulkan, " + alternatif.get(rank1).getNamaAlternatif() + " merupakan alternatif terbaik dengan skor = " + hasil[rank1]);
+        System.out.println("\nDapat disimpulkan, " + alternatif.get(rank1).getNamaAlternatif() + " merupakan alternatif terbaik dengan skor = " + max);
     }
 
     private double[][] normalisasi(){
-        double[][] normal = new double[kriteria.size()][alternatif.size()];
+        double[][] normal = new double[alternatif.size()][kriteria.size()];
 
         //mencari nilai maks dan min tiap kolom
         int[] max = new int[normal[0].length];
@@ -59,7 +72,7 @@ public class MabacSPK {
         for (int i = 0; i < normal[0].length; i++) {
             int[] column = new int[normal.length];
             for (int j = 0; j < column.length; j++) {
-                column[j] = (int) normal[j][i];
+                column[j] = (int) matriksKeputusan[j][i];
             }
             max[i] = Arrays.stream(column).max().getAsInt();
             min[i] = Arrays.stream(column).min().getAsInt();
@@ -68,11 +81,10 @@ public class MabacSPK {
         //normalisasi
         for (int i = 0; i < normal.length; i++) {
             for (int j = 0; j < normal[0].length; j++) {
-                if(kriteria.get(i).getJenis()){
-                    // normal[i][j] = (matriksKeputusan[i][j] == min[j]) ? 0 : ((matriksKeputusan[i][j] - min[j]) / (max[j]-min[j]));
-                    
+                if(kriteria.get(j).getJenis()){
+                    normal[i][j] = (matriksKeputusan[i][j] == min[j]) ? 0 : ((double)(matriksKeputusan[i][j] - min[j]) / (max[j]-min[j]));
                 }else{
-                    // normal[i][j] = (matriksKeputusan[i][j] == min[j]) ? 0 : ((matriksKeputusan[i][j] - min[j]) / (min[j] - max[j]));
+                    normal[i][j] = (matriksKeputusan[i][j] == min[j]) ? 0 : ((double)(matriksKeputusan[i][j] - min[j]) / (min[j] - max[j]));
                 }
             }
         }
@@ -90,12 +102,13 @@ public class MabacSPK {
 
     private double[] perkiraanBatas(double[][] arrayHitung){
         double[] batas = new double[kriteria.size()];
+        double pangkat =(double) 1/alternatif.size();
         for (int i = 0; i < arrayHitung[0].length; i++) {
             batas[i] = 1;
             for (int j = 0; j < arrayHitung.length; j++) {
                 batas[i] *= arrayHitung[j][i];
             }
-            batas[i] = Math.pow(batas[i], (1/kriteria.size()));
+            batas[i] = Math.pow(batas[i], pangkat);
         }
         return batas;
     }
@@ -112,6 +125,7 @@ public class MabacSPK {
     private Double[] hasilAkhir(double[][] arrayHitung){
         Double[] hasilAkhir = new Double[alternatif.size()];
         for (int i = 0; i < arrayHitung.length; i++) {
+            hasilAkhir[i] = (double) 0;
             for (int j = 0; j < arrayHitung[0].length; j++) {
                 hasilAkhir[i] += arrayHitung[i][j];
             }
