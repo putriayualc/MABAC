@@ -177,7 +177,7 @@ public class MabacSPK {
                 if(kriteria.get(j).getJenis()){
                     normal[i][j] = (matriksKeputusan[i][j] == min[j]) ? 0 : ((double)(matriksKeputusan[i][j] - min[j]) / (max[j]-min[j]));
                 }else{
-                    normal[i][j] = (matriksKeputusan[i][j] == min[j]) ? 0 : ((double)(matriksKeputusan[i][j] - min[j]) / (min[j] - max[j]));
+                    normal[i][j] = (matriksKeputusan[i][j] == max[j]) ? 0 : ((double)(matriksKeputusan[i][j] - min[j]) / (min[j] - max[j]));
                 }
             }
         }
